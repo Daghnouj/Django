@@ -1,0 +1,7 @@
+<h2>Supprimer le Cours: {{ cours.titre }}</h2>
+<p>Es-tu sûr de vouloir supprimer ce cours ?</p>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Oui, supprimer</button>
+    <a href="{% url 'liste_cours' %}">Annuler</a>
+</form>

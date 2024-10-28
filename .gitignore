@@ -1,16 +1,24 @@
+# Django
+*.log
+*.pot
 *.pyc
-*.DS_Store
-*.egg*
-/dist/
-/.idea
-/docs/_build/
-/node_modules/
-build/
-env
-env__
-/staticfiles/
+__pycache__/
+db.sqlite3
+*.sqlite3
 
-#src
-#*.sqlite*
+# Environments
+.env
+venv/
+env/
+venv/
 
-#.env
+# VS Code
+.vscode/
+
+# Django Secret Key
+**/settings.py
+
+# Static files
+/static/
+# Media files
+/media/
