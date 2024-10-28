@@ -1,0 +1,192 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+<style>
+    .indice {
+        display: none;
+        margin-top: 10px;
+        font-style: italic;
+        color: #555;
+    }
+    .feedback-container, .avis-container {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #f0f0f0;
+    }
+    .message, .feedback-message {
+        margin-top: 10px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+<script>
+    function afficherIndice(questionId) {
+        const indiceElement = document.getElementById(`indice_${questionId}`);
+        indiceElement.style.display = indiceElement.style.display === "none" ? "block" : "none";
+    }
+    function montrerFeedback(questionId) {
+        const feedbackOui = document.getElementById(`feedback-oui-${questionId}`);
+        const feedbackNon = document.getElementById(`feedback-non-${questionId}`);
+        const feedbackMessage = document.getElementById(`feedback-message-${questionId}`);
+        const submitButton = document.getElementById(`submit-button-${questionId}`);
+        const choix = document.querySelector(`input[name="feedback_${questionId}"]:checked`);
+
+        feedbackOui.style.display = "none";
+        feedbackNon.style.display = "none";
+        feedbackMessage.style.display = "none";
+        submitButton.style.display = "none";
+
+        if (choix) {
+            if (choix.value === "oui") {
+                feedbackOui.style.display = "block";
+                feedbackMessage.innerHTML = "Merci pour votre retour ! 😊";
+            } else {
+                feedbackNon.style.display = "block";
+                feedbackMessage.innerHTML = "Nous nous excusons pour cela. 😔";
+                submitButton.style.display = "block"; // Affiche le bouton de soumission
+            }
+            feedbackMessage.style.display = "block";
+        }
+    }
+
+    function ajouterAvis(questionId) {
+        const avisText = document.getElementById(`avis-text-${questionId}`).value;
+        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
+        avisDisplay.innerHTML = avisText;
+        avisDisplay.style.display = "block";
+    }
+
+    function modifierAvis(questionId) {
+        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
+        const avisText = document.getElementById(`avis-text-${questionId}`);
+        avisText.value = avisDisplay.innerHTML;
+        avisText.focus();
+    }
+
+    function supprimerAvis(questionId) {
+        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
+        avisDisplay.innerHTML = "";
+        avisDisplay.style.display = "none";
+    }
+
+    function soumettreQuestion(questionId) {
+        // Logique pour afficher un autre indice
+        afficherIndice(questionId);
+
+        // Rafraîchit la page pour charger le nouvel indice
+        location.reload();
+    }
+</script>
+<div class="container mt-5">
+    <h2>{{ quiz.title }}</h2>
+    
+    <h4 class="text-danger">Time Remaining: <span id="timer"></span></h4>
+    
+    <!-- Display quiz questions here -->
+    <form action="{% url 'submit_quiz' quiz.id %}" method="POST">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="question mb-4">
+            <button type="button" onclick="afficherIndice('{{ question.id }}')">Afficher l'indice</button>
+            <p id="indice_{{ question.id }}" class="indice">Indice: {{ question.generated_hint }}</p>
+            <p><strong>{{ question.content }}</strong></p>
+
+            
+            <!-- Multiple Choice (Choix Multiple) -->
+            {% if question.question_type == 'choice' %}
+                {% for answer in question.answers.all %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" id="answer_{{ answer.id }}">
+                    <label class="form-check-label" for="answer_{{ answer.id }}">{{ answer.text }}</label>
+                </div>
+                {% endfor %}
+            
+            <!-- True/False (Vrai/Faux) -->
+            {% elif question.question_type == 'true_false' %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="true" id="true_{{ question.id }}">
+                    <label class="form-check-label" for="true_{{ question.id }}">Vrai</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="false" id="false_{{ question.id }}">
+                    <label class="form-check-label" for="false_{{ question.id }}">Faux</label>
+                </div>
+            
+            <!-- Open-Ended (Question Ouverte) -->
+            {% elif question.question_type == 'open' %}
+                <div class="form-group">
+                    <textarea class="form-control" name="question_{{ question.id }}" rows="3" placeholder="Votre réponse..."></textarea>
+                </div>
+            {% endif %}
+            <button type="button" class="submit-button" id="submit-button-{{ question.id }}" onclick="soumettreQuestion({{ question.id }})">Soumettre cette question</button>
+
+            <!-- Section pour le feedback -->
+            <div class="feedback-container">
+                <h3>Avez-vous trouvé l'indice utile ?</h3>
+                <label>
+                    <input type="radio" name="feedback_{{ question.id }}" value="oui" onchange="montrerFeedback('{{ question.id }}')">
+                    Oui
+                </label>
+                <label>
+                    <input type="radio" name="feedback_{{ question.id }}" value="non" onchange="montrerFeedback('{{ question.id }}')">
+                    Non
+                </label>
+
+                <div id="feedback-oui-{{ question.id }}" style="display:none;">Merci pour votre retour positif ! 😊</div>
+                <div id="feedback-non-{{ question.id }}" style="display:none;">Nous nous excusons pour cela. 😔</div>
+                <div id="feedback-message-{{ question.id }}" class="feedback-message"></div>
+            </div>
+
+            <!-- Section pour avis utilisateur -->
+            <div class="avis-container">
+                <h3>Donnez votre avis :</h3>
+                <textarea id="avis-text-{{ question.id }}" rows="3" placeholder="Écrivez votre avis ici..."></textarea><br>
+                <button type="button" onclick="ajouterAvis('{{ question.id }}')">Ajouter</button>
+                <button type="button" onclick="modifierAvis('{{ question.id }}')">Modifier</button>
+                <button type="button" onclick="supprimerAvis('{{ question.id }}')">Supprimer</button>
+                <p id="avis-display-{{ question.id }}" style="display: none;"></p>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary mt-3">Submit Quiz</button>
+    </form>
+</div>
+
+<!-- Countdown Timer Script -->
+<script>
+    // Initialize timer based on quiz duration
+    var quizDuration = {{ quiz_duration }};
+    var timerDisplay = document.getElementById('timer');
+    var timer = quizDuration, minutes, seconds;
+
+    // Timer countdown function
+    function countdown() {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        timerDisplay.textContent = minutes + ":" + seconds;
+
+        // Redirect to submit page when time is up
+        if (--timer < 0) {
+            alert("Time's up!");
+            document.forms[0].submit();
+        }
+    }
+
+    // Start countdown every second
+    setInterval(countdown, 1000);
+</script>
+{% endblock content %}
