@@ -1,0 +1,107 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Add Course{% endblock %}
+
+{% block content %}
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Add a New Correction</h6>
+                </div>
+                <div class="col-lg-6 col-5 text-right">
+                    <a href="{% url 'course_list' %}" class="h2 text-white d-inline-block mb-0">list correction</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page content -->
+<div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header border-0">
+                    <h3 class="mb-0">Correction</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Correction name</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                            <div class="invalid-feedback">
+                                Please provide a course title.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Correction Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                            <div class="invalid-feedback">
+                                Please provide a course description.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Select matter</label>
+                            <select class="form-control" id="language" name="language" required>
+                                <option value="">Choose a matter</option>
+                                <option value="English">math</option>
+                                <option value="English">science</option>
+                                <option value="French">informatique</option>
+                                <option value="Spanish">frensh</option>
+                                <option value="English">Italian</option>
+                                <option value="German">German</option>
+                                
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a matter .
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Upload Correction Image</label>
+                            <input type="file" class="form-control" id="image" name="image">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Upload Correction File</label>
+                            <input type="file" class="form-control" id="file" name="file">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-block">Add Correction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}

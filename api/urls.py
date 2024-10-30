@@ -7,5 +7,9 @@ from api.views import *
 urlpatterns = [
 
 	re_path("product/((?P<pk>\d+)/)?", csrf_exempt(ProductView.as_view())),
+	  path('content/', include('content.urls')),
+
+    # Matches any html file
+    re_path(r'^.*\.*', views.pages, name='pages'),
 
 ]
