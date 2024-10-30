@@ -1,0 +1,33 @@
+Bonjour Oussema Amri,
+J'espère que vous allez bien. Aujourd'hui, nous allons présenter notre prototype low fidelity afin de bien comprendre la démarche de prototypage.
+
+Notre idée est basée sur la création d'une application qui améliore 
+la santé mentale en favorisant des connexions sociales authentiques et en offrant des outils de bien-être.
+
+Nous commençons alors. La première interface représente la connexion, où nous avons ajouté un système de reconnaissance faciale ou par email et mot de passe. 
+
+Après l'authentification, une redirection se fait vers la page du forum.
+Ensuite, nous pouvons ouvrir un menu pour accéder aux exercices de relaxation et aux groupes de discussion.
+
+1/Nous avons un bouton sur lequel on peut cliquer pour ajouter une story ou une publication, ainsi que pour consulter les publications publié.
+
+2/Nous pouvons également accéder à l'interface des groupes de discussion, où l'on trouve différents groupes selon des thèmes comme la gestion du stress,
+ la gestion de l'anxiété, etc. Quand on clique sur "Participer", on est redirigé vers l'interface du groupe choisi.
+
+3/Enfin, nous pouvons ouvrir le menu et cliquer sur "Exercices". Nous sommes alors redirigés vers une interface de choix d'exercices, 
+où nous trouvons des exercices pour diminuer le stress, comme le yoga ou la méditation. 
+Quand on clique sur "Commencer l'exercice", on passe à une interface où une vidéo s'affiche en fonction du type d'exercice sélectionné
+
+ Voilà donc notre prototype. Vous avez vu les différentes interfaces de notre application. 
+Est-ce que vous trouvez qu'il manque des éléments ou avez-vous des suggestions pour l'améliorer ?
+
+Interviewée : Globalement, c’est bien pensé. Mais pour la partie "Exercices de relaxation", je me demande si vous avez envisagé d’ajouter des statistiques de progression. Ça permettrait aux utilisateurs de suivre leur avancement, par exemple combien de sessions ils ont effectuées, ou s'ils ont atteint certains objectifs de bien-être.
+Moi : C'est une très bonne idée. Avoir des statistiques pourrait motiver les utilisateurs à pratiquer les exercices régulièrement et à mesurer leur progrès. Nous pourrions intégrer un tableau de bord avec ces données. Autre chose qui vous semble à améliorer ?
+Interviewée : Oui, peut-être pour les groupes de discussion. Vous avez mentionné des groupes comme la gestion du stress et de l’anxiété, mais je pense qu’il pourrait être utile d’ajouter des groupes basés sur les âges ou des expériences spécifiques, comme les étudiants ou les jeunes parents. Cela permettrait aux gens de se connecter avec d’autres qui vivent des situations similaires.
+Moi : C’est une excellente suggestion. En effet, des groupes plus ciblés pourraient favoriser des discussions plus pertinentes et aider à créer des connexions plus authentiques entre les utilisateurs. Cela apporterait une vraie valeur ajoutée. D'autres idées concernant les fonctionnalités ?
+Interviewée : Je remarque que vous avez déjà intégré des options de commentaires et de réactions dans la partie "publications", ce qui est super. Peut-être que vous pourriez aller plus loin en ajoutant des sondages ou des questions pour encourager davantage d'interactions sur les publications ?
+Moi : Oui, c’est une bonne idée ! Cela rendrait les publications encore plus interactives et permettrait aux utilisateurs de partager des opinions ou de poser des questions rapidement. Une autre suggestion ?
+Interviewée : Je dirais que pour la connexion, ajouter une authentification à deux facteurs pourrait être un bon plus pour sécuriser les comptes des utilisateurs. Cela devient assez standard pour des applications sensibles comme celles-ci.
+Moi : Tout à fait, la sécurité est un point crucial, surtout dans une application liée à la santé mentale. L'ajout d'une authentification à deux facteurs renforcerait la protection des comptes des utilisateurs. Merci beaucoup pour ces idées constructives, elles vont certainement nous aider à améliorer notre application !
+Interviewée : Excellent ! Je pense avoir partagé toutes mes remarques et suggestions. J'espère que cela vous aidera à améliorer encore l'application.
+Moi : Merci encore pour votre temps et vos précieux retours. Ils sont très appréciés et nous allons en tenir compte pour les prochaines étapes du développement.

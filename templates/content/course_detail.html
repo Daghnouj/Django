@@ -1,10 +1,11 @@
 
 {% extends 'layouts/base.html' %}
 
+
 {% block title %}{{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="header bg-primary pb-6">
+<div class="header" style="background-color: #40E0D0; padding-bottom: 1.5rem;"> <!-- Couleur turquoise -->
   <div class="container-fluid">
     <div class="header-body">
       <div class="row align-items-center py-4">
@@ -12,22 +13,29 @@
           <h6 class="h2 text-white d-inline-block mb-0">{{ course.title }}</h6>
           <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-              <li class="breadcrumb-item"><a href="{% url 'course_list' %}"><i class="fas fa-home"></i></a></li>
-              <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Correction</a></li>
+              <li class="breadcrumb-item">
+                <a href="{% url 'course_list' %}"><i class="fas fa-home"></i></a>
+              </li>
+              <li class="breadcrumb-item">
+                <a href="{% url 'course_list' %}">Correction</a>
+              </li>
               <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
             </ol>
           </nav>
         </div>
         <div class="col-lg-6 col-5 text-right">
-          <a href="{% url 'edit_course' course.id %}" class="btn btn-sm btn-neutral"> <i class="ni ni-settings"></i>
-             Edit Correction</a>
-          <button class="btn btn-sm btn-danger" onclick="openModal()"> <i class="ni ni-basket"></i>
-             Delete Correction</button>
+          <a href="{% url 'edit_course' course.id %}" class="btn btn-sm btn-light"> <!-- Bouton blanc -->
+            <i class="ni ni-settings"></i> Edit Correction
+          </a>
+          <button class="btn btn-sm btn-light" onclick="openModal()"> <!-- Bouton blanc -->
+            <i class="ni ni-basket"></i> Delete Correction
+          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
 <!-- Page content -->
 <div class="container-fluid mt--6">
@@ -41,8 +49,11 @@
           <p class="lead">{{ course.description }}</p>
           <h3 class="lead">{{ course.language }}</h3>
 
-          <button class="btn btn-sm btn-primary float-right" onclick="openSummaryModal()"> <i class="ni ni-ungroup"></i>
-             Show the Summary of the correction</button>
+          <button class="btn btn-sm" style="background-color: #40E0D0; color: white;" onclick="openSummaryModal()"> 
+            <i class="ni ni-ungroup"></i>
+            Show the Summary of the correction
+          </button>
+          
 
           {% if course.file %}
             <div class="mt-4">
@@ -55,13 +66,16 @@
           {% endif %}
           
           {% if questions %}
-            <h4 class="mt-5">Generated Questions</h4>
+            <h4 class="mt-5">correction</h4>
             <div class="row">
                 {% for question in questions %}
                 <div class="col-md-6">
                     <div class="card shadow-sm mb-4" style="background-color: #f2f6f8;">
                     <div class="card-body">
-                        <h5 class="card-title text-primary"><i class="fas fa-question-circle me-2"></i>Question</h5>
+                      <h5 class="card-title" style="color: #40E0D0;"> <!-- Couleur turquoise -->
+                        <i class="fas fa-question-circle me-2"></i>Question
+                      </h5>
+                      
                         {% if question.id %}
 
                         <form method="post" action="{% url 'edit_question' question.id %}" class="question-form">
@@ -72,15 +86,21 @@
                         <input type="text" name="text" value="{{ question.text }}" class="form-control mb-2 question-input" style="display: none;" />
 
                         <!-- Boutons d'édition et de sauvegarde pour la question -->
-                        <button type="button" class="btn btn-warning btn-sm edit-button" onclick="toggleEdit(this)">                       <i class="ni ni-settings"></i>
-                             Edit</button>
+                        <button type="button" class="btn btn-sm edit-button" style="background-color: #40E0D0; color: white;" onclick="toggleEdit(this)">
+                          <i class="ni ni-settings"></i>
+                          Edit
+                        </button>
+                        
                         <button type="submit" class="btn btn-primary btn-sm save-button" style="display: none;">Save Question</button>
                         </form>
                         {% endif %}
 
                         <hr>
 
-                        <h5 class="card-title text-success"><i class="fas fa-check-circle me-2"></i>Answer</h5>
+                        <h5 class="card-title" style="color: #40E0D0;"> <!-- Couleur turquoise -->
+                          <i class="fas fa-check-circle me-2"></i>Answer
+                        </h5>
+                        
                         {% if question.id %}
                         <form method="post" action="{% url 'edit_answer' question.id %}" class="answer-form">
                         {% csrf_token %}
@@ -90,16 +110,19 @@
                         <textarea name="answer" class="form-control mb-2 answer-input" style="display: none;">{{ question.answer }}</textarea>
 
                         <!-- Boutons d'édition et de sauvegarde pour la réponse -->
-                        <button type="button" class="btn btn-warning btn-sm edit-button" onclick="toggleEdit(this)">                      <i class="ni ni-settings"></i>
-                            Edit</button>
+                        <button type="button" class="btn btn-success btn-sm edit-button" onclick="toggleEdit(this)">
+                          <i class="ni ni-settings"></i>
+                          Edit
+                      </button>
+                      
                         <button type="submit" class="btn btn-success btn-sm save-button" style="display: none;">Save Answer</button>
                         </form>
                         {% endif %}
 
                         <!-- Bouton de suppression de la question -->
 
-                        <button class="btn btn-sm btn-danger float-right" onclick="openDeleteModal()">                       <i class="ni ni-basket"></i>
-                             Delete this Question</button>
+                        
+                        
 
                     </div>
                     </div>
@@ -128,8 +151,9 @@
       <div class="custom-modal-footer">
         <form method="post" action="{% url 'delete_course' course.id %}">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Yes, delete</button>
-          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn" style="background-color: #40E0D0; color: white;">Yes, delete</button>
+          <button type="button" class="btn" style="background-color: #40E0D0; color: white;" onclick="closeModal()">Cancel</button>
+          
         </form>
       </div>
     </div>
