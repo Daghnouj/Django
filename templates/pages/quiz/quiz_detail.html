@@ -129,10 +129,24 @@
 
     function soumettreQuestion(questionId) {
         // Logique pour afficher un autre indice
-        afficherIndice(questionId);
+        //afficherIndice(questionId);
+        fetch("{% url 'quiz_detail' quiz.id %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ question_id: questionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById(`indice_${questionId}`).textContent = data.new_hint;
+            document.getElementById(`indice_${questionId}`).style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
 
-        // Rafraîchit la page pour charger le nouvel indice
-        location.reload();
+        
     }
 </script>
 <div class="container mt-5">

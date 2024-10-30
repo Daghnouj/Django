@@ -14,29 +14,52 @@ from django.http import JsonResponse
 def indexQuiz(request):
     Quizzes = Test.objects.all()
     return render(request, 'pages/quiz/index.html', {'Quizzes': Quizzes})
+# def quiz_detail(request, quiz_id):
+#     quiz = get_object_or_404(Test, id=quiz_id)
+#     shuffled_questions = quiz.questions.all().order_by('?')
+#     for question in shuffled_questions:
+#         question.generated_hint = generate_hint(question.content)
+        
+#     if request.method == "POST":
+#         question_id = request.POST.get('question_id')
+#         user_comment = request.POST.get('user_comment', '')
+#         helpful = request.POST.get('helpful') == 'on'
+#         feedback_id = request.POST.get('feedback_id', None)
+#         # Ajouter ou mettre à jour le feedback de l'utilisateur
+#         if feedback_id:  # Modification
+#             feedback = UserFeedback.objects.get(id=feedback_id)
+#             feedback.user_comment = user_comment
+#             feedback.helpful = helpful
+#             feedback.save()
+#         else:  # Ajout
+#             if question_id:
+#                 question = Question.objects.get(id=question_id)
+#                 UserFeedback.objects.create(question=question, user_comment=user_comment, helpful=helpful)
+
+    
+#     # Pass the duration of the quiz in seconds (e.g., 15 minutes * 60 = 900 seconds)
+#     context = {
+#         'quiz': quiz,
+#         'questions': shuffled_questions,
+#         'quiz_duration': quiz.duration * 60  # Convert duration to seconds if stored in minutes
+#     }
+#     return render(request, 'pages/quiz/quiz_detail.html', context)
 def quiz_detail(request, quiz_id):
     quiz = get_object_or_404(Test, id=quiz_id)
     shuffled_questions = quiz.questions.all().order_by('?')
+    
+    # Generate hints for each question on initial load
     for question in shuffled_questions:
         question.generated_hint = generate_hint(question.content)
-    if request.method == "POST":
-        question_id = request.POST.get('question_id')
-        user_comment = request.POST.get('user_comment', '')
-        helpful = request.POST.get('helpful') == 'on'
-        feedback_id = request.POST.get('feedback_id', None)
-        # Ajouter ou mettre à jour le feedback de l'utilisateur
-        if feedback_id:  # Modification
-            feedback = UserFeedback.objects.get(id=feedback_id)
-            feedback.user_comment = user_comment
-            feedback.helpful = helpful
-            feedback.save()
-        else:  # Ajout
-            if question_id:
-                question = Question.objects.get(id=question_id)
-                UserFeedback.objects.create(question=question, user_comment=user_comment, helpful=helpful)
-
     
-    # Pass the duration of the quiz in seconds (e.g., 15 minutes * 60 = 900 seconds)
+    # AJAX request to get a new hint for a specific question without reloading the page
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        question_id = request.POST.get('question_id')
+        question = get_object_or_404(Question, id=question_id)
+        new_hint = generate_hint(question.content)
+        return JsonResponse({'new_hint': new_hint})
+
+    # If not an AJAX request, load the entire quiz page normally
     context = {
         'quiz': quiz,
         'questions': shuffled_questions,
