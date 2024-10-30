@@ -6,7 +6,7 @@
 {% block extrastyle %}
 <style>
     body {
-        background-color: #f8f9fa; /* Couleur de fond douce */
+        background-color: #f8f9fa;
     }
     h2 {
         text-align: center;
@@ -17,30 +17,90 @@
         transition: background-color 0.3s;
     }
     .list-group-item:hover {
-        background-color: #e9ecef; /* Couleur d'hover */
+        background-color: #e9ecef;
     }
     .add-course-btn {
         margin-top: 20px;
         text-align: center;
     }
-    .search-results {
+    .search-container {
+        margin-top: 20px;
+    }
+    .dropdown-container {
+        text-align: center;
         margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    .dropdown {
+        width: 100%;
+        max-width: 300px;
+        margin: auto;
     }
 </style>
 
 {% endblock extrastyle %}
 
 {% block content %}
+<script>
+    function searchCourses() {
+        const query = document.getElementById('search-input').value.trim();
+        const resultsContainer = document.getElementById('search-results');
+        
+        if (query.length === 0) {
+            // Recharge la page pour afficher tous les cours si le champ est vide
+            window.location.href = '/cours';
+            return;
+        }
+        
+        fetch(`/cours/search/?q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = ''; // Efface les résultats précédents
+                
+                if (data.length > 0) {
+                    data.forEach(course => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.innerHTML = `<a href="/cours/${course.id}/" class="text-decoration-none">${course.title}</a>`;
+                        resultsContainer.appendChild(listItem);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<li class="list-group-item text-muted">Aucun cours trouvé.</li>';
+                }
+            });
+    }
+
+    function handleActionChange() {
+        const action = document.getElementById('action-select').value;
+        if (action === 'upload') {
+            window.location.href = "{% url 'ajouter_cours' %}";
+        } else if (action === 'generate') {
+            window.location.href = "{% url 'generate_course' %}";
+        }
+    }
+</script>
 <div class="container mt-5">
     <h2>Liste des Cours</h2>
     
     <!-- Champ de recherche -->
-    <input type="text" id="search-input" onkeyup="searchCourses()" placeholder="Rechercher des cours..." class="form-control mb-3">
+    <div class="search-container">
+        <input type="text" id="search-input" onkeyup="searchCourses()" placeholder="Rechercher des cours..." class="form-control mb-3">
+    </div>
+
+    <!-- Liste déroulante pour ajouter un cours ou générer un cours -->
+    <div class="dropdown-container">
+        <select id="action-select" class="form-control dropdown" onchange="handleActionChange()">
+            <option value="" selected disabled>Ajouter ou Générer un cours</option>
+            <option value="upload">Uploader un cours</option>
+            <option value="generate">Générer un cours</option>
+        </select>
+    </div>
     
+    <!-- Liste des cours -->
     <ul class="list-group" id="search-results">
         {% for cours in page_obj %}
             <li class="list-group-item">
-                <a href="{% url 'details_cours' cours.id %}" class="text-decoration-none">{{ cours.titre }}</a>
+                <a href="{% url 'details_cours' cours.id %}" class="text-decoration-none">{{ cours.title }}</a>
             </li>
         {% empty %}
             <li class="list-group-item text-muted">Aucun cours disponible.</li>
@@ -70,7 +130,6 @@
                 </li>
             {% endif %}
 
-            <!-- Page numbers -->
             {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -101,31 +160,5 @@
         </ul>
     </nav>
 
-    <div class="add-course-btn">
-        <a href="{% url 'ajouter_cours' %}" class="btn btn-primary">Ajouter un nouveau cours</a>
-    </div>
 </div>
-<script>
-    function searchCourses() {
-        const query = document.getElementById('search-input').value;
-        const resultsContainer = document.getElementById('search-results');
-        
-        if (query.length > 0) {
-            fetch(`/cours/search/?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    resultsContainer.innerHTML = '';  // Clear previous results
-                    data.forEach(course => {
-                        const listItem = document.createElement('li');
-                        listItem.className = 'list-group-item';
-                        // Construire l'URL dynamique
-                        listItem.innerHTML = `<a href="/cours/${course.id}/" class="text-decoration-none">${course.titre}</a>`;
-                        resultsContainer.appendChild(listItem);
-                    });
-                });
-        } else {
-            resultsContainer.innerHTML = '';  // Clear results if no query
-        }
-    }
-</script>
 {% endblock content %}

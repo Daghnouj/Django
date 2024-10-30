@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.authtoken.views import obtain_auth_token # <-- NEW
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('home.urls')),
@@ -26,6 +28,7 @@ urlpatterns = [
     path('cours',include('cours.urls')), 
     path('questions',include('questions.urls')),
     path('quiz',include('quiz.urls')),
+    path('chat',include('chatbot.urls')),
 ]
 
 # Lazy-load on routing is needed
@@ -35,3 +38,5 @@ try:
     urlpatterns.append( path("login/jwt/", view=obtain_auth_token) )
 except:
     pass
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

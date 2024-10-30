@@ -7,6 +7,8 @@ from questions.models import Question
 
 from .models import Test,Response,UserFeedback
 from performancemetrics.models import Performance,Recommendation
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 # Create your views here.
 def indexQuiz(request):
@@ -119,3 +121,16 @@ def submit_quiz(request, quiz_id):
     
     # If GET request, redirect back to the quiz page
     return redirect('quiz_detail', quiz_id=quiz.id)
+@require_POST
+def submit_feedback(request):
+    question_id = request.POST.get('question_id')
+    user_comment = request.POST.get('user_comment', '')
+    helpful = request.POST.get('helpful', 'false') == 'true'
+    
+    question = Question.objects.get(id=question_id)
+    feedback = UserFeedback.objects.create(
+        question=question,
+        user_comment=user_comment,
+        helpful=helpful
+    )
+    return JsonResponse({'status': 'success'})

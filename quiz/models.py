@@ -31,5 +31,3 @@ class UserFeedback(models.Model):
     user_comment = models.TextField(blank=True)
     helpful = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Feedback for: {self.question.text}"

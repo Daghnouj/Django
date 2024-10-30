@@ -31,13 +31,13 @@
         {% csrf_token %}
         
         <div class="form-group">
-            <label for="titre">{{ form.titre.label }}</label>
-            <input type="text" name="titre" class="form-control" value="{{ form.titre.value|default_if_none:'' }}">
+            <label for="title">{{ form.title.label }}</label>
+            <input type="text" name="title" class="form-control" value="{{ form.title.value|default_if_none:'' }}">
         </div>
 
         <div class="form-group">
-            <label for="description">{{ form.description.label }}</label>
-            <textarea name="description" class="form-control">{{ form.description.value|default_if_none:'' }}</textarea>
+            <label for="content">{{ form.description.label }}</label>
+            <textarea name="content" class="form-control">{{ form.content.value|default_if_none:'' }}</textarea>
         </div>
 
         <div class="form-group">

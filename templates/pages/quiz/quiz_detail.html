@@ -23,6 +23,10 @@
         font-weight: bold;
         display: none;
     }
+    .submit-button {
+        margin-top: 10px;
+        display: none; /* Masqué par défaut */
+    }
 </style>
 {% endblock extrastyle %}
 
@@ -57,24 +61,70 @@
         }
     }
 
-    function ajouterAvis(questionId) {
-        const avisText = document.getElementById(`avis-text-${questionId}`).value;
-        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
-        avisDisplay.innerHTML = avisText;
-        avisDisplay.style.display = "block";
+    function submitFeedback(questionId) {
+        const userComment = document.getElementById(`avis-text-${questionId}`);
+        const feedbackMessage = document.getElementById(`feedback-message-${questionId}`);
+        const feedbackInput = document.querySelector(`input[name="feedback_${questionId}"]:checked`);
+    
+        if (!userComment) {
+            console.error(`Comment textarea for question ${questionId} not found.`);
+            return;
+        }
+    
+        const commentValue = userComment.value.trim();
+        const helpful = feedbackInput ? (feedbackInput.value === "oui") : false;
+    
+        if (!commentValue) {
+            alert("Please enter your feedback before submitting.");
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append('question_id', questionId);
+        formData.append('user_comment', commentValue);
+        formData.append('helpful', helpful);
+    
+        fetch("{% url 'submit_feedback' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Feedback submitted successfully!");
+                // Clear the input fields
+                userComment.value = ''; // Clear the comment textarea
+                feedbackMessage.innerHTML = ''; // Clear the feedback message
+                feedbackMessage.style.display = 'none'; // Hide the feedback message
+                // Reset radio buttons
+                document.querySelector(`input[name="feedback_${questionId}"]:checked`).checked = false;
+            } else {
+                alert("There was an error submitting your feedback.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
     }
 
-    function modifierAvis(questionId) {
-        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
-        const avisText = document.getElementById(`avis-text-${questionId}`);
-        avisText.value = avisDisplay.innerHTML;
-        avisText.focus();
-    }
+    
 
     function supprimerAvis(questionId) {
-        const avisDisplay = document.getElementById(`avis-display-${questionId}`);
-        avisDisplay.innerHTML = "";
-        avisDisplay.style.display = "none";
+        const userComment = document.getElementById(`avis-text-${questionId}`);
+    const feedbackMessage = document.getElementById(`feedback-message-${questionId}`);
+    
+    // Clear the comment textarea
+    userComment.value = '';
+    
+    // Clear the feedback message
+    feedbackMessage.innerHTML = '';
+    feedbackMessage.style.display = 'none'; // Hide the feedback message
+
+    // Reset radio buttons
+    const feedbackInputs = document.querySelectorAll(`input[name="feedback_${questionId}"]`);
+    feedbackInputs.forEach(input => {
+        input.checked = false; // Uncheck all feedback radio buttons
+    });
     }
 
     function soumettreQuestion(questionId) {
@@ -127,13 +177,13 @@
                     <textarea class="form-control" name="question_{{ question.id }}" rows="3" placeholder="Votre réponse..."></textarea>
                 </div>
             {% endif %}
-            <button type="button" class="submit-button" id="submit-button-{{ question.id }}" onclick="soumettreQuestion({{ question.id }})">Soumettre cette question</button>
+            <button type="button" class="submit-button" id="submit-button-{{ question.id }}" onclick="soumettreQuestion('{{question.id }}')">Soumettre cette question</button>
 
             <!-- Section pour le feedback -->
             <div class="feedback-container">
                 <h3>Avez-vous trouvé l'indice utile ?</h3>
                 <label>
-                    <input type="radio" name="feedback_{{ question.id }}" value="oui" onchange="montrerFeedback('{{ question.id }}')">
+                    <input type="radio" name="feedback_{{ question.id }}" value="oui" onchange="montrerFeedback('{{question.id }}')">
                     Oui
                 </label>
                 <label>
@@ -150,9 +200,9 @@
             <div class="avis-container">
                 <h3>Donnez votre avis :</h3>
                 <textarea id="avis-text-{{ question.id }}" rows="3" placeholder="Écrivez votre avis ici..."></textarea><br>
-                <button type="button" onclick="ajouterAvis('{{ question.id }}')">Ajouter</button>
-                <button type="button" onclick="modifierAvis('{{ question.id }}')">Modifier</button>
-                <button type="button" onclick="supprimerAvis('{{ question.id }}')">Supprimer</button>
+                <button type="button" onclick="submitFeedback('{{ question.id }}')">Ajouter</button>
+              
+                <button type="button" onclick="supprimerAvis('{{ question.id }}')">Clear</button>
                 <p id="avis-display-{{ question.id }}" style="display: none;"></p>
             </div>
         </div>

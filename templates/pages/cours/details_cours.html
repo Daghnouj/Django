@@ -1,4 +1,7 @@
+
+
 {% extends 'layouts/base.html' %}
+{% comment %} {% extends 'layouts/base.html' %}
 {% load static %}
 
 {% block breadcrumbs %}{% endblock breadcrumbs %}
@@ -6,13 +9,15 @@
 {% block extrastyle %}
 <style>
     body {
-        background-color: #f8f9fa;
+        background-color: #f0f4f8;
+        font-family: 'Arial', sans-serif;
     }
 
     .card {
         margin-bottom: 20px;
         border-radius: 10px;
         border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .modal-header {
@@ -36,43 +41,74 @@
     }
 
     #pdf-viewer {
+        width: 100%;
+        max-height: 600px; /* Limite la hauteur pour éviter le dépassement sur les petits écrans */
+        overflow: auto;
         border: 1px solid #dee2e6;
         border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+        color: #333;
+    }
+
+    .text-muted {
+        font-size: 0.9em;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .file-preview {
+        border: 1px solid #007bff;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #fff;
     }
 </style>
 
 {% endblock extrastyle %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 <div class="container mt-5">
-    <h2 class="text-center">Détails du Cours: {{ cours.titre }}</h2>
+    <h2 class="text-center">Détails du Cours: {{ cours.title }}</h2>
     <div class="card">
         <div class="card-body">
-            <p><strong>Description:</strong> {{ cours.description }}</p>
+            <p><strong>Description:</strong> {{ cours.content|linebreaks }}</p>
             <p><strong>Date d'Upload:</strong> {{ cours.date_creation }}</p>
             <p><strong>Date de Modification:</strong> {{ cours.date_modification }}</p>
-            <div class="mt-3">
-                <button class="btn btn-warning" data-toggle="modal" data-target="#editModal">Modifier</button>
-                <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Supprimer</button>
+            <div class="action-buttons">
+                <button class="btn btn-warning" data-toggle="modal" data-target="#editModal">
+                    <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                    <i class="fas fa-trash-alt"></i> Supprimer
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal pour voir le contenu du fichier -->
+    <!-- Aperçu du fichier -->
     <div class="modal-body">
         {% if cours.fichier %}
-        <div class="card">
+        <div class="card file-preview">
             <div class="card-body">
                 {% with file_extension=cours.fichier.name|slice:"-4:" %}
                 {% if file_extension in ".pdf" %}
                 <h5 class="text-center">Aperçu du PDF</h5>
-                <div id="pdf-viewer" style="width: 100%; height: 700px;"></div>
+                <div id="pdf-viewer"></div>
                 <div class="text-center mt-2">
-                    <button id="prev" class="btn btn-secondary">Page Précédente</button>
+                    <button id="prev" class="btn btn-secondary">
+                        <i class="fas fa-chevron-left"></i> Page Précédente
+                    </button>
                     <span id="page-info">Page 1</span>
-                    <button id="next" class="btn btn-secondary">Page Suivante</button>
+                    <button id="next" class="btn btn-secondary">
+                        Page Suivante <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
                 {% elif file_extension in ".jpg" or file_extension in ".jpeg" or file_extension in ".png" or file_extension in ".gif" %}
                 <h5 class="text-center">Image du Cours</h5>
@@ -97,7 +133,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Modifier le Cours: {{ cours.titre }}</h5>
+                    <h5 class="modal-title" id="editModalLabel">Modifier le Cours: {{ cours.title }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -106,12 +142,12 @@
                     <form method="POST" enctype="multipart/form-data" action="{% url 'modifier_cours' cours.id %}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="titre">Titre</label>
-                            <input type="text" id="titre" name="titre" value="{{ cours.titre }}" class="form-control" required>
+                            <label for="title">title</label>
+                            <input type="text" id="title" name="title" value="{{ cours.title }}" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label for="description">Description</label>
-                            <textarea id="description" name="description" class="form-control" required>{{ cours.description }}</textarea>
+                            <textarea id="content" name="content" class="form-control" required>{{ cours.content }}</textarea>
                         </div>
                         <div class="form-group">
                             <label for="fichier">Fichier actuel:</label>
@@ -121,8 +157,12 @@
                             <small class="form-text text-muted">Laissez ce champ vide si vous ne souhaitez pas changer le fichier actuel.</small>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Modifier</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Sauvegarder
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fas fa-times"></i> Annuler
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -146,8 +186,12 @@
                 <div class="modal-footer">
                     <form method="POST" action="{% url 'supprimer_cours' cours.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Supprimer
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
                     </form>
                 </div>
             </div>
@@ -160,59 +204,260 @@
         var url = '{{ cours.fichier.url }}';
         var pdfDoc = null;
         var currentPage = 1;
-        var totalPages = 0;
+       
+        var pageRendering = false;
+        var pageNumPending = null;
 
-        var loadingTask = pdfjsLib.getDocument(url);
-        loadingTask.promise.then(function(pdf) {
+        // Initialisation du PDF.js
+        pdfjsLib.getDocument(url).promise.then(function (pdf) {
             pdfDoc = pdf;
-            totalPages = pdf.numPages;
-            document.getElementById('page-info').textContent = 'Page ' + currentPage + ' sur ' + totalPages;
+            document.getElementById('page-info').textContent = 'Page ' + currentPage + ' de ' + pdfDoc.numPages;
             renderPage(currentPage);
-        }, function (reason) {
-            console.error(reason);
         });
 
-        function renderPage(pageNum) {
-            pdfDoc.getPage(pageNum).then(function(page) {
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function (page) {
                 var scale = 1.5;
-                var viewport = page.getViewport({scale: scale});
-
+                var viewport = page.getViewport({ scale: scale });
                 var canvas = document.createElement('canvas');
                 var context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                document.getElementById('pdf-viewer').innerHTML = '';
+                document.getElementById('pdf-viewer').innerHTML = ''; // Efface le précédent rendu
                 document.getElementById('pdf-viewer').appendChild(canvas);
 
                 var renderContext = {
                     canvasContext: context,
                     viewport: viewport
                 };
-                page.render(renderContext);
+                var renderTask = page.render(renderContext);
+                renderTask.promise.then(function () {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
             });
+
+            document.getElementById('page-info').textContent = 'Page ' + num + ' de ' + pdfDoc.numPages;
         }
 
-        document.getElementById('prev').addEventListener('click', function() {
+        document.getElementById('prev').addEventListener('click', function () {
             if (currentPage <= 1) return;
             currentPage--;
             renderPage(currentPage);
-            document.getElementById('page-info').textContent = 'Page ' + currentPage + ' sur ' + totalPages;
         });
 
-        document.getElementById('next').addEventListener('click', function() {
-            if (currentPage >= totalPages) return;
+        document.getElementById('next').addEventListener('click', function () {
+            if (currentPage >= pdfDoc.numPages) return;
             currentPage++;
             renderPage(currentPage);
-            document.getElementById('page-info').textContent = 'Page ' + currentPage + ' sur ' + totalPages;
         });
     </script>
-    {% else %}
-    <p class="text-danger">Aucun fichier disponible pour cet affichage.</p>
     {% endif %}
+    
+    <!-- Scripts de jQuery et Bootstrap -->
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</div>
+{% endblock content %} {% endcomment %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+<style>
+    .indice {
+        display: none;
+        margin-top: 10px;
+        font-style: italic;
+        color: #555;
+    }
+    .feedback-container, .avis-container {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #f9f9f9;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .message, .feedback-message {
+        margin-top: 10px;
+        font-weight: bold;
+        display: none;
+    }
+    .form-check {
+        margin: 10px 0;
+    }
+    .submit-button {
+        display: none; /* Masqué par défaut */
+    }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+<script>
+    function afficherIndice(questionId) {
+        const indiceElement = document.getElementById(indice_${questionId});
+        indiceElement.style.display = indiceElement.style.display === "none" ? "block" : "none";
+    }
+
+    function montrerFeedback(questionId) {
+        const feedbackOui = document.getElementById(feedback-oui-${questionId});
+        const feedbackNon = document.getElementById(feedback-non-${questionId});
+        const feedbackMessage = document.getElementById(feedback-message-${questionId});
+        const choix = document.querySelector(input[name="feedback_${questionId}"]:checked);
+
+        feedbackOui.style.display = "none";
+        feedbackNon.style.display = "none";
+        feedbackMessage.style.display = "none";
+
+        if (choix) {
+            if (choix.value === "oui") {
+                feedbackOui.style.display = "block";
+                feedbackMessage.innerHTML = "Merci pour votre retour ! 😊";
+            } else {
+                feedbackNon.style.display = "block";
+                feedbackMessage.innerHTML = "Nous nous excusons pour cela. 😔";
+            }
+            feedbackMessage.style.display = "block";
+        }
+    }
+
+    function submitFeedback(questionId) {
+        const userComment = document.getElementById(avis-text-${questionId});
+        const feedbackMessage = document.getElementById(feedback-message-${questionId});
+        const feedbackInput = document.querySelector(input[name="feedback_${questionId}"]:checked);
+
+        const commentValue = userComment.value.trim();
+        const helpful = feedbackInput ? (feedbackInput.value === "oui") : false;
+
+        if (!commentValue) {
+            alert("Veuillez entrer votre avis avant de soumettre.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('question_id', questionId);
+        formData.append('user_comment', commentValue);
+        formData.append('helpful', helpful);
+
+        fetch("{% url 'submit_feedback' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Retour soumis avec succès !");
+                userComment.value = ''; // Réinitialise le champ de commentaire
+                feedbackMessage.innerHTML = ''; // Réinitialise le message de feedback
+                feedbackMessage.style.display = 'none'; // Cache le message de feedback
+            } else {
+                alert("Une erreur est survenue lors de la soumission de votre retour.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function supprimerAvis(questionId) {
+        const userComment = document.getElementById(avis-text-${questionId});
+        userComment.value = ''; // Réinitialise le champ de commentaire
+    }
+</script>
+
+<div class="container mt-5">
+    <h2>{{ quiz.title }}</h2>
+    <h4 class="text-danger">Temps restant : <span id="timer"></span></h4>
+    
+    <form action="{% url 'submit_quiz' quiz.id %}" method="POST">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="question mb-4 p-3 border border-secondary rounded">
+            <button type="button" class="btn btn-info" onclick="afficherIndice('{{ question.id }}')">Afficher l'indice</button>
+            <p id="indice_{{ question.id }}" class="indice">Indice: {{ question.generated_hint }}</p>
+            <p><strong>{{ question.content }}</strong></p>
+
+            {% if question.question_type == 'choice' %}
+                {% for answer in question.answers.all %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" id="answer_{{ answer.id }}">
+                    <label class="form-check-label" for="answer_{{ answer.id }}">{{ answer.text }}</label>
+                </div>
+                {% endfor %}
+            {% elif question.question_type == 'true_false' %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="true" id="true_{{ question.id }}">
+                    <label class="form-check-label" for="true_{{ question.id }}">Vrai</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="false" id="false_{{ question.id }}">
+                    <label class="form-check-label" for="false_{{ question.id }}">Faux</label>
+                </div>
+            {% elif question.question_type == 'open' %}
+                <div class="form-group">
+                    <textarea class="form-control" id="avis-text-{{ question.id }}" rows="3" placeholder="Votre réponse..."></textarea>
+                </div>
+            {% endif %}
+            
+            <!-- Section pour le feedback -->
+            <div class="feedback-container">
+                <h3>Avez-vous trouvé l'indice utile ?</h3>
+                <label>
+                    <input type="radio" name="feedback_{{ question.id }}" value="oui" onchange="montrerFeedback('{{question.id }}')"> Oui
+                </label>
+                <label>
+                    <input type="radio" name="feedback_{{ question.id }}" value="non" onchange="montrerFeedback('{{ question.id }}')"> Non
+                </label>
+
+                <div id="feedback-oui-{{ question.id }}" style="display:none;" class="text-success">Merci pour votre retour positif ! 😊</div>
+                <div id="feedback-non-{{ question.id }}" style="display:none;" class="text-danger">Nous nous excusons pour cela. 😔</div>
+                <div id="feedback-message-{{ question.id }}" class="feedback-message"></div>
+            </div>
+
+            <!-- Section pour avis utilisateur -->
+            <div class="avis-container">
+                <h3>Donnez votre avis :</h3>
+                <textarea id="avis-text-{{ question.id }}" class="form-control" rows="3" placeholder="Écrivez votre avis ici..."></textarea><br>
+                <button type="button" class="btn btn-primary mt-2" onclick="submitFeedback('{{ question.id }}')">Ajouter</button>
+                <button type="button" class="btn btn-secondary mt-2" onclick="supprimerAvis('{{ question.id }}')">Effacer</button>
+                <p id="avis-display-{{ question.id }}" style="display: none;"></p>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary mt-3">Soumettre le quiz</button>
+    </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    var quizDuration = {{ quiz_duration }};
+    var timerDisplay = document.getElementById('timer');
+    var timer = quizDuration, minutes, seconds;
+
+    function countdown() {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        timerDisplay.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            alert("Temps écoulé !");
+            document.forms[0].submit();
+        }
+    }
+
+    setInterval(countdown, 1000);
+</script>
 {% endblock content %}

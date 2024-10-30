@@ -41,7 +41,7 @@ def generate_course(request):
         html = markdown.markdown(generated_course)
         print(html)
         # Enregistrer le cours dans la base de données
-        new_cours = Document(titre=title, description=generated_course)
+        new_cours = Document(title=title, content=generated_course)
         new_cours.save()
 
         return render(
@@ -62,7 +62,7 @@ def ajouter_cours(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Cours ajouté avec succès.")
-            return redirect("pages/cours/index.html")
+            return redirect("liste_cours")
     else:
         form = CoursForm()
     return render(request, "pages/cours/ajouter_cours.html", {"form": form})
@@ -76,7 +76,7 @@ def modifier_cours(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "Cours modifié avec succès.")
-            return redirect("pages/cours/details_cours.html", id=cours.id)
+            return redirect("details_cours", id=cours.id)
     else:
         form = CoursForm(instance=cours)
     return render(request, "pages/cours/modifier_cours.html", {"form": form, "cours": cours})
@@ -88,7 +88,7 @@ def supprimer_cours(request, id):
     if request.method == "POST":
         cours.delete()
         messages.success(request, "Cours supprimé avec succès.")
-        return redirect("pages/cours/index.html")
+        return redirect("liste_cours")
     return render(request, "pages/cours/supprimer_cours.html", {"cours": cours})
 
 
@@ -139,8 +139,8 @@ def liste_cours(request):
 def search_courses(request):
     query = request.GET.get("q", "")
     if query:
-        cours = Document.objects.filter(titre__icontains=query).values(
-            "id", "titre"
+        cours = Document.objects.filter(title__icontains=query).values(
+            "id", "title"
         )  # On récupère seulement les champs nécessaires
     else:
         cours = Document.objects.none()  # Si pas de recherche, renvoyer un queryset vide
