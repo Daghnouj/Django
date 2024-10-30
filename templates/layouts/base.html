@@ -8,13 +8,11 @@
 
 <head>
   {% include 'includes/head.html' %}
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Custom styles -->
   {% block extrastyle %}{% endblock extrastyle %}
   {% block extrahead %}{% endblock extrahead %}
 </head>
+<body>
 
-<body class="bg-light">
-  
   {% block pre_loader %}
     {% include 'includes/pre-loader.html' %}
   {% endblock pre_loader %}
@@ -32,50 +30,20 @@
     <div class="pcoded-wrapper">
       <div class="pcoded-content">
         <div class="pcoded-inner-content">
-
-          <!-- [ Breadcrumb ] start -->
+          <!-- [ breadcrumb ] start -->
           {% block breadcrumbs %}
             {% include 'includes/breadcrumb.html' %}
           {% endblock breadcrumbs %}
-          <!-- [ Breadcrumb ] end -->
-
+          <!-- [ breadcrumb ] end -->
           <div class="main-body">
             <div class="page-wrapper">
+              {% block content %}
+             
               
-              <div class="container-fluid">
-                {% block content %}
-                  <div class="alert alert-info" role="alert">
-                    <strong>Welcome!</strong> This is your dashboard overview.
-                  </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <h2 class="page-title">Dashboard</h2>
-                      <hr>
-                    </div>
-                  </div>
-
-                  <!-- Main content area -->
-                  <div class="row">
-                    <div class="col-md-6 col-lg-4">
-                      <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                          <h5 class="my-0 font-weight-normal">Card Title</h5>
-                        </div>
-                        <div class="card-body">
-                          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                          <button type="button" class="btn btn-primary">Go somewhere</button>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Repeat for additional cards or content -->
-                  </div>
-
-                {% endblock content %}
-              </div>
-
+              {% endblock content %}
             </div>
           </div>
-
+          {% comment %} {% include 'pages/chat/chat.html' %} {% endcomment %}
         </div>
       </div>
     </div>
@@ -83,6 +51,6 @@
 
   {% include 'includes/scripts.html' %}
   {% block extra_js %}{% endblock extra_js %}
-  
+
 </body>
 </html>

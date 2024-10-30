@@ -9,6 +9,7 @@ from .models import Test,Response,UserFeedback
 from performancemetrics.models import Performance,Recommendation
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def indexQuiz(request):
@@ -44,6 +45,7 @@ def indexQuiz(request):
 #         'quiz_duration': quiz.duration * 60  # Convert duration to seconds if stored in minutes
 #     }
 #     return render(request, 'pages/quiz/quiz_detail.html', context)
+@login_required
 def quiz_detail(request, quiz_id):
     quiz = get_object_or_404(Test, id=quiz_id)
     shuffled_questions = quiz.questions.all().order_by('?')
@@ -66,6 +68,7 @@ def quiz_detail(request, quiz_id):
         'quiz_duration': quiz.duration * 60  # Convert duration to seconds if stored in minutes
     }
     return render(request, 'pages/quiz/quiz_detail.html', context)
+@login_required
 
 def submit_quiz(request, quiz_id):
     quiz = get_object_or_404(Test, id=quiz_id)
@@ -145,6 +148,7 @@ def submit_quiz(request, quiz_id):
     # If GET request, redirect back to the quiz page
     return redirect('quiz_detail', quiz_id=quiz.id)
 @require_POST
+@login_required
 def submit_feedback(request):
     question_id = request.POST.get('question_id')
     user_comment = request.POST.get('user_comment', '')

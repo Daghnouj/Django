@@ -6,52 +6,47 @@
 {% block extrastyle %}
 <style>
     body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif; 
+        background-color: #f8f9fa; 
+        margin: 20px;
     }
     h1 {
-        margin-bottom: 30px;
-        font-size: 2.5rem;
+        margin-bottom: 30px; 
+        font-size: 2.5rem; 
         color: #343a40;
     }
-    .section-title {
-        margin-top: 40px;
-        margin-bottom: 20px;
-        color: #007bff;
-        font-weight: bold;
-        font-size: 1.5rem;
-    }
-    .course-content {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        line-height: 1.6;
-        white-space: pre-wrap; /* Conserver les sauts de ligne */
-        margin-bottom: 30px;
-        max-height: 600px; /* Limiter la hauteur du contenu */
-        overflow-y: auto; /* Ajouter un défilement si nécessaire */
+    .generated-course {
+        background-color: #ffffff; 
+        border: 1px solid #ccc; 
+        padding: 30px; 
+        border-radius: 10px; 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
+        line-height: 1.6; 
+        white-space: pre-wrap; 
+        margin-bottom: 30px; 
+        max-height: 600px; 
+        overflow-y: auto;
     }
     .button-group {
-        margin-top: 40px;
-        display: flex;
-        justify-content: space-around; /* Espacer les boutons de manière égale */
+        margin-top: 40px; 
+        display: flex; 
+        justify-content: space-around;
     }
     .btn {
-        flex: 1; /* Rendre les boutons de la même taille */
-        margin: 0 10px; /* Espacement entre les boutons */
+        flex: 1; 
+        margin: 0 10px;
     }
     footer {
-        margin-top: 40px;
-        text-align: center;
-        font-size: 0.9rem;
+        margin-top: 40px; 
+        text-align: center; 
+        font-size: 0.9rem; 
         color: #6c757d;
     }
     .alert {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1050;
+        position: fixed; 
+        top: 20px; 
+        right: 20px; 
+        z-index: 1050; 
         display: none;
     }
 </style>
@@ -59,34 +54,23 @@
 {% endblock extrastyle %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center">Cours généré : {{ title }}</h1>
-    <hr>
-    
-    <!-- Affichage du cours généré -->
-    <div class="course-content" id="courseContent">
-        {{ generated_course|safe }}
-    </div>
-
-    <!-- Notifications -->
-    <div class="alert alert-success" id="copyAlert" role="alert">
-        Le cours a été copié dans le presse-papier !
-    </div>
-
-    <!-- Groupement de boutons -->
-    <div class="button-group">
-        <!-- Bouton de copie -->
-        <button class="btn btn-info copy-button" onclick="copyToClipboard()">Copier le cours</button>
-
-        <!-- Bouton de téléchargement PDF -->
-        <button class="btn btn-success download-button" onclick="downloadPDF()">Télécharger en PDF</button>
-
-        <!-- Bouton de retour à la liste des cours -->
-        <a href="{% url 'liste_cours' %}" class="btn btn-primary back-button">Retour à la liste des cours</a>
-    </div>
+<h1>{{ title }}</h1>
+<div class="generated-course" id="courseContent">
+    {{ html_content|safe }}  <!-- Utiliser 'safe' pour afficher le HTML -->
 </div>
 
-<!-- Intégrer Bootstrap JS (optionnel) -->
+<!-- Notifications -->
+<div class="alert alert-success" id="copyAlert" role="alert">
+    Le cours a été copié dans le presse-papier !
+</div>
+
+<!-- Groupement de boutons -->
+<div class="button-group">
+    <button class="btn btn-info copy-button" onclick="copyToClipboard()">Copier le cours</button>
+    <button class="btn btn-success download-button" onclick="downloadPDF()">Télécharger en PDF</button>
+    <a href="{% url 'liste_cours' %}" class="btn btn-primary back-button">Retour à la liste des cours</a>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -97,12 +81,11 @@
         const courseContent = document.getElementById("courseContent").innerText;
         navigator.clipboard.writeText(courseContent)
             .then(() => {
-                // Afficher l'alerte
                 const alert = document.getElementById("copyAlert");
                 alert.style.display = "block";
                 setTimeout(() => {
                     alert.style.display = "none";
-                }, 3000); // Disparaître après 3 secondes
+                }, 3000);
             })
             .catch(err => {
                 console.error('Erreur lors de la copie : ', err);
@@ -116,15 +99,37 @@
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
-        // Récupérer le contenu du cours
+        const courseTitle = "{{ title }}";
         const courseContent = document.getElementById("courseContent").innerText;
 
-        // Ajouter du texte au PDF
-        doc.text(courseContent, 10, 10);
+        // Ajouter le titre
+        doc.setFontSize(20);
+        doc.text(courseTitle, 10, 20);
+        
+        // Définir la taille du texte pour le contenu
+        doc.setFontSize(12);
+        const pageHeight = doc.internal.pageSize.height;
+        const lineHeight = 10;
+        const margin = 10;
+        let y = 30;
 
-        // Générer et télécharger le fichier PDF
-        doc.save("Cours_generé.pdf");
+        // Diviser le contenu pour l'adapter aux pages
+        const lines = doc.splitTextToSize(courseContent, 180);
+        lines.forEach(line => {
+            if (y + lineHeight > pageHeight - margin) {
+                doc.addPage();
+                y = 20; // Réinitialiser la position en haut de la nouvelle page
+            }
+            doc.text(line, 10, y);
+            y += lineHeight;
+        });
+
+        // Enregistrer le PDF
+        doc.save(courseTitle + ".pdf");
     }
 </script>
+
+<footer>
+    <p>&copy; 2024 Cours Généré. Tous droits réservés.</p>
+</footer>
 {% endblock content %}

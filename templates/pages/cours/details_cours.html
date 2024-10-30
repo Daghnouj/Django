@@ -23,24 +23,13 @@
         color: white;
     }
 
-    .btn-warning {
-        background-color: #ffc107;
-        border: none;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
+    .action-buttons button {
+        margin-right: 10px; /* Espacement entre les boutons */
     }
 
     #pdf-viewer {
         width: 100%;
-        max-height: 600px; /* Limite la hauteur pour éviter le dépassement sur les petits écrans */
+        max-height: 600px;
         overflow: auto;
         border: 1px solid #dee2e6;
         border-radius: 10px;
@@ -49,15 +38,6 @@
 
     h2 {
         color: #333;
-    }
-
-    .text-muted {
-        font-size: 0.9em;
-    }
-
-    .action-buttons {
-        display: flex;
-        justify-content: space-between;
     }
 
     .file-preview {
@@ -74,9 +54,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 <div class="container mt-5">
     <h2 class="text-center">Détails du Cours: {{ cours.title }}</h2>
+
     <div class="card">
         <div class="card-body">
-            <p><strong>Description:</strong> {{ cours.content|linebreaks }}</p>
+            <p><strong>Description:</strong></p>
+            <div>{{ cours.content|safe }}</div> <!-- Rendu HTML avec 'safe' -->
             <p><strong>Date d'Upload:</strong> {{ cours.date_creation }}</p>
             <p><strong>Date de Modification:</strong> {{ cours.date_modification }}</p>
             <div class="action-buttons">
@@ -96,9 +78,22 @@
         <div class="card file-preview">
             <div class="card-body">
                 {% with file_extension=cours.fichier.name|slice:"-4:" %}
+                <h5 class="text-center">
+                    {% if file_extension in ".pdf" %} Aperçu du PDF
+                    {% elif file_extension in ".jpg" or file_extension in ".jpeg" or file_extension in ".png" or file_extension in ".gif" %} Image du Cours
+                    {% elif file_extension in ".mp4" or file_extension in ".webm" or file_extension in ".ogg" %} Vidéo du Cours
+                    {% else %} Type de fichier non pris en charge
+                    {% endif %}
+                </h5>
+
+                <div id="pdf-viewer" style="{% if file_extension in '.pdf' %}display:block;{% else %}display:none;{% endif %}"></div>
+                <img src="{{ cours.fichier.url }}" alt="Image du cours" class="img-fluid" style="{% if file_extension in '.jpg' or file_extension in '.jpeg' or file_extension in '.png' or file_extension in '.gif' %}display:block;{% else %}display:none;{% endif %}">
+                <video width="100%" height="auto" controls style="{% if file_extension in '.mp4' or file_extension in '.webm' or file_extension in '.ogg' %}display:block;{% else %}display:none;{% endif %}">
+                    <source src="{{ cours.fichier.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la vidéo.
+                </video>
+
                 {% if file_extension in ".pdf" %}
-                <h5 class="text-center">Aperçu du PDF</h5>
-                <div id="pdf-viewer"></div>
                 <div class="text-center mt-2">
                     <button id="prev" class="btn btn-secondary">
                         <i class="fas fa-chevron-left"></i> Page Précédente
@@ -108,17 +103,6 @@
                         Page Suivante <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-                {% elif file_extension in ".jpg" or file_extension in ".jpeg" or file_extension in ".png" or file_extension in ".gif" %}
-                <h5 class="text-center">Image du Cours</h5>
-                <img src="{{ cours.fichier.url }}" alt="Image du cours" class="img-fluid">
-                {% elif file_extension in ".mp4" or file_extension in ".webm" or file_extension in ".ogg" %}
-                <h5 class="text-center">Vidéo du Cours</h5>
-                <video width="100%" height="auto" controls>
-                    <source src="{{ cours.fichier.url }}" type="video/mp4">
-                    Votre navigateur ne supporte pas la vidéo.
-                </video>
-                {% else %}
-                <p class="text-danger">Ce type de fichier n'est pas pris en charge pour l'affichage direct.</p>
                 {% endif %}
                 {% endwith %}
             </div>
@@ -140,11 +124,11 @@
                     <form method="POST" enctype="multipart/form-data" action="{% url 'modifier_cours' cours.id %}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="title">title</label>
+                            <label for="title">Titre</label>
                             <input type="text" id="title" name="title" value="{{ cours.title }}" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="description">Description</label>
+                            <label for="content">Description</label>
                             <textarea id="content" name="content" class="form-control" required>{{ cours.content }}</textarea>
                         </div>
                         <div class="form-group">
@@ -179,7 +163,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    Êtes-vous sûr de vouloir supprimer ce cours?
+                    Êtes-vous sûr de vouloir supprimer ce cours ?
                 </div>
                 <div class="modal-footer">
                     <form method="POST" action="{% url 'supprimer_cours' cours.id %}">
@@ -196,13 +180,12 @@
         </div>
     </div>
 
-    <!-- Scripts de Bootstrap -->
+    <!-- Scripts de Bootstrap et jQuery -->
     {% if cours.fichier %}
     <script>
         var url = '{{ cours.fichier.url }}';
         var pdfDoc = null;
         var currentPage = 1;
-       
         var pageRendering = false;
         var pageNumPending = null;
 
@@ -216,16 +199,13 @@
         function renderPage(num) {
             pageRendering = true;
             pdfDoc.getPage(num).then(function (page) {
-                var scale = 1.5;
-                var viewport = page.getViewport({ scale: scale });
+                var viewport = page.getViewport({ scale: 1.5 });
                 var canvas = document.createElement('canvas');
                 var context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-
-                document.getElementById('pdf-viewer').innerHTML = ''; // Efface le précédent rendu
+                document.getElementById('pdf-viewer').innerHTML = '';
                 document.getElementById('pdf-viewer').appendChild(canvas);
-
                 var renderContext = {
                     canvasContext: context,
                     viewport: viewport
@@ -239,7 +219,6 @@
                     }
                 });
             });
-
             document.getElementById('page-info').textContent = 'Page ' + num + ' de ' + pdfDoc.numPages;
         }
 
@@ -256,11 +235,8 @@
         });
     </script>
     {% endif %}
-    
-    <!-- Scripts de jQuery et Bootstrap -->
-    
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </div>
 {% endblock content %}

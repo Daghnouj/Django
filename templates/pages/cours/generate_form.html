@@ -30,8 +30,8 @@
     <form method="POST" action="{% url 'generate_course' %}">
         {% csrf_token %}
         <div class="form-group">
-            <label for="titre">Titre du Cours</label>
-            <input type="text" name="titre" class="form-control" required>
+            <label for="title">Titre du Cours</label>
+            <input type="text" name="title" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Générer</button>
     </form>
