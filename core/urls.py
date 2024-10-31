@@ -26,7 +26,7 @@ urlpatterns = [
     path('', include('django_dyn_dt.urls')), # <-- NEW: Dynamic_DT Routing 
     path('performance',include('performancemetrics.urls')), 
     path('cours',include('cours.urls')), 
-    path('questions',include('questions.urls')),
+    path('questions/',include('questions.urls')),
     path('quiz',include('quiz.urls')),
     path('chat',include('chatbot.urls')),
 ]
