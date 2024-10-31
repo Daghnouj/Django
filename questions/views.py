@@ -14,7 +14,9 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import textwrap
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def generate_questions(request):
     questions = []
     search_term = ''
@@ -58,6 +60,7 @@ def generate_questions(request):
     })
 
 @csrf_exempt  
+@login_required
 def save_question(request):
     if request.method == 'POST':
         try:
@@ -74,7 +77,7 @@ def save_question(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée.'}, status=405)
-
+@login_required
 def export_questions_csv(request):
     # Récupérer les questions générées de la session
     questions = request.session.get('generated_questions', [])
@@ -90,7 +93,7 @@ def export_questions_csv(request):
         writer.writerow([question['content'], question['question_type']])  # Écrire chaque question
 
     return response
-
+@login_required
 def export_questions_pdf(request):
     # Récupérer les questions générées de la session
     questions = request.session.get('generated_questions', [])
